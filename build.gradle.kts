@@ -62,7 +62,7 @@ dependencies {
 }
 
 paperweight {
-    serverProject = project(":tentacles-server")
+    serverProject = project(":icecream-server")
 
     remapRepo = paperMavenPublicUrl
     decompileRepo = paperMavenPublicUrl
@@ -75,10 +75,10 @@ paperweight {
             baseName("Purpur")
 
             apiPatchDir = layout.projectDirectory.dir("patches/api")
-            apiOutputDir = layout.projectDirectory.dir("Tentacles-API")
+            apiOutputDir = layout.projectDirectory.dir("IceCream-API")
 
             serverPatchDir = layout.projectDirectory.dir("patches/server")
-            serverOutputDir = layout.projectDirectory.dir("Tentacles-Server")
+            serverOutputDir = layout.projectDirectory.dir("IceCream-Server")
         }
 
         patchTasks.register("generatedApi") {
@@ -91,19 +91,19 @@ paperweight {
 }
 
 tasks.generateDevelopmentBundle {
-    apiCoordinates = "org.purpurmc.tentacles:tentacles-api"
+    apiCoordinates = "xyz.icecreammc.icecream:icecream-api"
     libraryRepositories.addAll(
         "https://repo.maven.apache.org/maven2/",
         paperMavenPublicUrl,
-        "https://repo.purpurmc.org/snapshots",
+        "https://repo.icecreammc.xyz/snapshots",
     )
 }
 
 allprojects {
     publishing {
         repositories {
-            maven("https://repo.purpurmc.org/snapshots") {
-                name = "tentacles"
+            maven("https://repo.icecreammc.xyz/snapshots") {
+                name = "icecream"
                 credentials(PasswordCredentials::class)
             }
         }
@@ -124,7 +124,7 @@ tasks.register("printMinecraftVersion") {
     }
 }
 
-tasks.register("printTentaclesVersion") {
+tasks.register("printIceCreamVersion") {
     doLast {
         println(project.version)
     }

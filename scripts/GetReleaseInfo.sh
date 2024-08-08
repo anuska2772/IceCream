@@ -30,7 +30,7 @@ make_latest=$([ "$preVersion" = "true" ] && echo "false" || echo "true")
 rm -f $discordmes
 rm -f $releaseinfo
 
-mv build/libs/IceCream-paperclip-"$gradleVersion"-mojmap.jar "$jarName"
+mv build/libs/IceCream-paperclip-1.21-mojmap.jar "$jarName"
 {
   echo "name=$icecreamid"
   echo "tag=$tagid"

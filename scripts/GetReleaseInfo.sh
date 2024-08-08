@@ -21,7 +21,7 @@ mcversion=$(prop mcVersion)
 gradleVersion=$(prop version)
 preVersion=$(prop preVersion)
 tagid="$mcversion-$commitid"
-jarName="icecream-$mcversion.jar"
+jarName="IceCream-$mcversion.jar"
 icecreamid="IceCream-$BUILD_NUMBER-$commitid"
 releaseinfo="releaseinfo.md"
 discordmes="discordmes.json"
@@ -30,7 +30,7 @@ make_latest=$([ "$preVersion" = "true" ] && echo "false" || echo "true")
 rm -f $discordmes
 rm -f $releaseinfo
 
-mv build/libs/IceCream-paperclip-1.21-mojmap.jar "$jarName"
+mv build/libs/icecream-paperclip-1.21-mojmap.jar "$jarName"
 {
   echo "name=$icecreamid"
   echo "tag=$tagid"

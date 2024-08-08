@@ -28,8 +28,6 @@ jobs:
         run: |
           git config --global user.email "ci@icecreammc.xyz"
           git config --global user.name "IceCream CI"
-      - name: Get Build Number
-        run: bash scripts/GetBuildNumber.sh
       - name: Apply Patches
         run: ./gradlew applyPatches
       - name: Create Paperclip Jar

@@ -1,3 +1,5 @@
+#!/bin/bash
+
 sha256() {
   sha256sum $1 | awk '{print $1}'
 }

@@ -95,14 +95,14 @@ tasks.generateDevelopmentBundle {
     libraryRepositories.addAll(
         "https://repo.maven.apache.org/maven2/",
         paperMavenPublicUrl,
-        "https://repo.icecreammc.xyz/snapshots",
+        "https://repo.purpurmc.org/snapshots",
     )
 }
 
 allprojects {
     publishing {
         repositories {
-            maven("https://repo.icecreammc.xyz/snapshots") {
+            maven("https://repo.purpurmc.org/snapshots") {
                 name = "icecream"
                 credentials(PasswordCredentials::class)
             }

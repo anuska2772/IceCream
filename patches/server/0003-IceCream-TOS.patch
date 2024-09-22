@@ -1,0 +1,94 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: James Smith <eesastudios@gmail.com>
+Date: Sun, 22 Sep 2024 06:40:45 +0000
+Subject: [PATCH] IceCream TOS
+
+
+diff --git a/src/main/java/net/minecraft/server/Main.java b/src/main/java/net/minecraft/server/Main.java
+index aad2cdf4c2237caf2c99695d0cbb01f56c0074e2..8e066e81eaa489d027335bbc2034d1e263d7040b 100644
+--- a/src/main/java/net/minecraft/server/Main.java
++++ b/src/main/java/net/minecraft/server/Main.java
+@@ -137,6 +137,12 @@ public class Main {
+             RegionFileVersion.configure(dedicatedserversettings.getProperties().regionFileComression);
+             Path path2 = Paths.get("eula.txt");
+             Eula eula = new Eula(path2);
++
++            // IceCream start - Add IceCream Terms of Service check
++            Path IceCreamTosPath = Paths.get("icecream-tos.txt");
++            IceCreamTos IceCreamTos = new IceCreamTos(IceCreamTosPath);
++            // IceCream start - Add IceCream Terms of Service check
++
+             // Paper start - load config files early for access below if needed
+             org.bukkit.configuration.file.YamlConfiguration bukkitConfiguration = io.papermc.paper.configuration.PaperConfigurations.loadLegacyConfigFile((File) optionset.valueOf("bukkit-settings"));
+             org.bukkit.configuration.file.YamlConfiguration spigotConfiguration = io.papermc.paper.configuration.PaperConfigurations.loadLegacyConfigFile((File) optionset.valueOf("spigot-settings"));
+@@ -156,7 +162,7 @@ public class Main {
+                 commandsConfiguration.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(Main.class.getClassLoader().getResourceAsStream("configurations/commands.yml"), Charsets.UTF_8)));
+                 commandsConfiguration.save(commandFile);
+                 // CraftBukkit end
+-                Main.LOGGER.info("Initialized '{}' and '{}'", path1.toAbsolutePath(), path2.toAbsolutePath());
++                Main.LOGGER.info("Initialized '{}' and '{}'", path1.toAbsolutePath(), path2.toAbsolutePath(), IceCreamTosPath.toAbsolutePath());
+                 return;
+             }
+ 
+@@ -174,6 +180,14 @@ public class Main {
+                 return;
+             }
+ 
++            // IceCream - Add Ice Cream Terms of Service check
++            if (!IceCreamTos.hasAgreedToTOS()) {
++                Main.LOGGER.info("You need to agree to the IceCream Terms of Service in order to run the server. Go to icecream-tos.txt for more info.");
++                return;
++            }
++
++            // IceCream - Add Ice Cream Terms of Service check
++
+             // Paper start - Detect headless JRE
+             String awtException = io.papermc.paper.util.ServerEnvironment.awtDependencyCheck();
+             if (awtException != null) {
+diff --git a/src/main/java/xyz/icecreammc/icecream/IceCreamTos.java b/src/main/java/xyz/icecreammc/icecream/IceCreamTos.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..f043b5bf3d5ce6634428ac78a87541d8d32e84d5
+--- /dev/null
++++ b/src/main/java/xyz/icecreammc/icecream/IceCreamTos.java
+@@ -0,0 +1,41 @@
++package net.minecraft.server;
++
++import java.io.IOException;
++import java.nio.file.Files;
++import java.nio.file.Path;
++import org.slf4j.Logger;
++import org.slf4j.LoggerFactory;
++import net.minecraft.server.Main;
++
++public class IceCreamTos {
++    private static final Logger LOGGER = LoggerFactory.getLogger(IceCreamTos.class);
++    private final Path tosFile;
++    private final boolean agreed;
++
++    public IceCreamTos(Path file) {
++        this.tosFile = file;
++        this.agreed = this.readTosFile();
++    }
++
++    private boolean readTosFile() {
++        try {
++            String str = Files.readString(this.tosFile);
++            return str.trim().equals("icecream-tos=true");
++        } catch (IOException ioexception) {
++            this.createTosFile();
++            return false;
++        }
++    }
++
++    private void createTosFile() {
++        try {
++            Files.writeString(this.tosFile, "By changing the setting below to TRUE you are indicating your agreement to our Ice Cream Terms of Service (https://info.icecreammc.xyz).\nicecream-tos=false");
++        } catch (IOException ioexception) {
++            IceCreamTos.LOGGER.warn("Failed to write IceCream terms of service file", ioexception);
++        }
++    }
++
++    public boolean hasAgreedToTOS() {
++        return this.agreed;
++    }
++}

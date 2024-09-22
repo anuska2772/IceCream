@@ -55,7 +55,7 @@ index 6d36fc6d8e22d9b68dea3830f6ecc8763184c343..c1334dbd5e027c41a4502c14491d34e5
              updateMessage = text("You are running a development version without access to version information", color(0xFF5300));
          } else {
 -            updateMessage = getUpdateStatusMessage("PurpurMC/Purpur", build); // Purpur
-+            updateMessage = getUpdateStatusMessage("PurpurMC/IceCream", build); // Purpur // IceCream
++            updateMessage = getUpdateStatusMessage("IceCream/IceCream", build); // Purpur // IceCream
          }
          final @Nullable Component history = this.getHistory();
  

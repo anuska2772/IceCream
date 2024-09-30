@@ -1,0 +1,113 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <84547061+Pan-cakse@users.noreply.github.com>
+Date: Mon, 30 Sep 2024 17:48:03 +0000
+Subject: [PATCH] Gui Modifications
+
+
+diff --git a/src/main/java/net/minecraft/server/gui/MinecraftServerGui.java b/src/main/java/net/minecraft/server/gui/MinecraftServerGui.java
+index 8f74c2ec5252b6265549589310d742337c91cb2c..883e227725fbb3e1a4c39bf524c17a16f39c220e 100644
+--- a/src/main/java/net/minecraft/server/gui/MinecraftServerGui.java
++++ b/src/main/java/net/minecraft/server/gui/MinecraftServerGui.java
+@@ -32,6 +32,8 @@ import javax.swing.text.Document;
+ import net.minecraft.DefaultUncaughtExceptionHandler;
+ import net.minecraft.server.dedicated.DedicatedServer;
+ import org.slf4j.Logger;
++import xyz.icecreammc.icecream.gui.LoadingScreen;
++
+ 
+ public class MinecraftServerGui extends JComponent {
+ 
+@@ -56,7 +58,20 @@ public class MinecraftServerGui extends JComponent {
+             ;
+         }
+ 
+-        final JFrame jframe = new JFrame("Purpur Minecraft server"); // Purpur
++        // IceCream start - Loading Screen
++        LoadingScreen loadingScreen = new LoadingScreen();
++        loadingScreen.show();
++
++        try {
++            Thread.sleep(5000);
++        } catch (InterruptedException e) {
++            e.printStackTrace();
++        }
++
++        loadingScreen.close();
++        // IceCream end - loading screen
++
++        final JFrame jframe = new JFrame("IceCream Minecraft server"); // IceCream
+         final MinecraftServerGui servergui = new MinecraftServerGui(server);
+ 
+         jframe.setDefaultCloseOperation(2);
+@@ -64,7 +79,7 @@ public class MinecraftServerGui extends JComponent {
+         jframe.pack();
+         jframe.setLocationRelativeTo((Component) null);
+         jframe.setVisible(true);
+-        jframe.setName("Purpur Minecraft server"); // Paper - Improve ServerGUI // Purpur
++        jframe.setName("IceCream Minecraft server"); // Paper - Improve ServerGUI // IceCream
+ 
+         // Paper start - Improve ServerGUI
+         try {
+@@ -76,7 +91,7 @@ public class MinecraftServerGui extends JComponent {
+         jframe.addWindowListener(new WindowAdapter() {
+             public void windowClosing(WindowEvent windowevent) {
+                 if (!servergui.isClosing.getAndSet(true)) {
+-                    jframe.setTitle("Purpur Minecraft server - shutting down!"); // Purpur
++                    jframe.setTitle("IceCream Minecraft server - shutting down!"); // Purpur
+                     server.halt(true);
+                     servergui.runFinalizers();
+                 }
+@@ -123,10 +138,10 @@ public class MinecraftServerGui extends JComponent {
+ 
+     // Paper start - Add onboarding message for initial server start
+     private JComponent buildOnboardingPanel() {
+-        String onboardingLink = "https://docs.papermc.io/paper/next-steps";
++        String onboardingLink = "https://discord.icecreammc.xyz/";
+         JPanel jPanel = new JPanel();
+ 
+-        javax.swing.JLabel jLabel = new javax.swing.JLabel("If you need help setting up your server you can visit:");
++        javax.swing.JLabel jLabel = new javax.swing.JLabel("If you need help setting up your server you can join our Discord:");
+         jLabel.setFont(MinecraftServerGui.MONOSPACED);
+ 
+         javax.swing.JLabel link = new javax.swing.JLabel("<html><u> " + onboardingLink + "</u></html>");
+diff --git a/src/main/java/xyz/icecreammc/icecream/gui/LoadingScreen.java b/src/main/java/xyz/icecreammc/icecream/gui/LoadingScreen.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..77baf6deb4039978cd58ecec9b9ee6db190e2b98
+--- /dev/null
++++ b/src/main/java/xyz/icecreammc/icecream/gui/LoadingScreen.java
+@@ -0,0 +1,35 @@
++package xyz.icecreammc.icecream.gui;
++
++import javax.swing.*;
++import java.awt.*;
++import net.minecraft.server.gui.MinecraftServerGui;
++
++public class LoadingScreen {
++
++    private final JDialog loadingDialog;
++
++    public LoadingScreen() {
++        loadingDialog = new JDialog((Frame) null, "Loading", true);
++        loadingDialog.setSize(300, 150);
++        loadingDialog.setLocationRelativeTo(null);
++
++        JLabel loadingLabel = new JLabel("Starting IceCream server, please wait...", SwingConstants.CENTER);
++        loadingLabel.setFont(new Font("Monospaced", Font.PLAIN, 14));
++
++        JProgressBar progressBar = new JProgressBar();
++        progressBar.setIndeterminate(true);
++
++        loadingDialog.add(loadingLabel, BorderLayout.CENTER);
++        loadingDialog.add(progressBar, BorderLayout.SOUTH);
++
++        loadingDialog.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
++    }
++
++    public void show() {
++        SwingUtilities.invokeLater(() -> loadingDialog.setVisible(true));
++    }
++
++    public void close() {
++        SwingUtilities.invokeLater(() -> loadingDialog.dispose());
++    }
++}

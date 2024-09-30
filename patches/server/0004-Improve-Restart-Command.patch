@@ -1,0 +1,264 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <84547061+Pan-cakse@users.noreply.github.com>
+Date: Mon, 30 Sep 2024 18:10:00 +0000
+Subject: [PATCH] Improve Restart Command
+
+The command made by Spigot only looks for a start.sh but i added the ability to find a start.bat for Windows systems
+
+diff --git a/src/main/java/org/spigotmc/RestartCommand.java b/src/main/java/org/spigotmc/RestartCommand.java
+index 3ba27955548a26367a87d6b87c3c61beb299dfb9..8e664ac5a6cb84e3fd1e49613241cfc946e51e69 100644
+--- a/src/main/java/org/spigotmc/RestartCommand.java
++++ b/src/main/java/org/spigotmc/RestartCommand.java
+@@ -8,172 +8,140 @@ import org.bukkit.command.Command;
+ import org.bukkit.command.CommandSender;
+ import org.bukkit.craftbukkit.util.CraftChatMessage;
+ 
+-public class RestartCommand extends Command
+-{
++public class RestartCommand extends Command {
+ 
+-    public RestartCommand(String name)
+-    {
+-        super( name );
++    public RestartCommand(String name) {
++        super(name);
+         this.description = "Restarts the server";
+         this.usageMessage = "/restart";
+-        this.setPermission( "bukkit.command.restart" );
++        this.setPermission("bukkit.command.restart");
+     }
+ 
+     @Override
+-    public boolean execute(CommandSender sender, String currentAlias, String[] args)
+-    {
+-        if ( this.testPermission( sender ) )
+-        {
+-            MinecraftServer.getServer().processQueue.add( new Runnable()
+-            {
++    public boolean execute(CommandSender sender, String currentAlias, String[] args) {
++        if (this.testPermission(sender)) {
++            MinecraftServer.getServer().processQueue.add(new Runnable() {
+                 @Override
+-                public void run()
+-                {
++                public void run() {
+                     RestartCommand.restart();
+                 }
+-            } );
++            });
+         }
+         return true;
+     }
+ 
+-    public static void restart()
+-    {
+-        RestartCommand.restart( SpigotConfig.restartScript );
++    public static void restart() {
++        RestartCommand.restart(findRestartScript());
+     }
+ 
+-    private static void restart(final String restartScript)
+-    {
+-        AsyncCatcher.enabled = false; // Disable async catcher incase it interferes with us
+-        try
+-        {
+-            // Paper - extract method and cleanup
+-            boolean isRestarting = addShutdownHook( restartScript );
+-            if ( isRestarting )
+-            {
+-                System.out.println( "Attempting to restart with " + SpigotConfig.restartScript );
+-            } else
+-            {
+-                System.out.println( "Startup script '" + SpigotConfig.restartScript + "' does not exist! Stopping server." );
++    private static String findRestartScript() {
++        String os = System.getProperty("os.name").toLowerCase(java.util.Locale.ENGLISH);
++        String restartScript = SpigotConfig.restartScript;
++
++        if (restartScript != null && !restartScript.isEmpty() && new File(restartScript.split(" ")[0]).isFile()) {
++            return restartScript;
++        }
++
++        if (os.contains("win")) {
++            if (new File("start.bat").exists()) {
++                return "start.bat";
++            }
++        } else {
++            if (new File("start.sh").exists()) {
++                return "start.sh";
+             }
++        }
++
++        return restartScript;
++    }
++
++    private static void restart(final String restartScript) {
++        AsyncCatcher.enabled = false;
++        try {
++            boolean isRestarting = addShutdownHook(restartScript);
++            if (isRestarting) {
++                System.out.println("Attempting to restart with " + restartScript);
++            } else {
++                System.out.println("Startup script '" + restartScript + "' does not exist! Stopping server.");
++            }
++
+             // Stop the watchdog
+             WatchdogThread.doStop();
+ 
+-            shutdownServer( isRestarting );
+-            // Paper end
+-        } catch ( Exception ex )
+-        {
++            shutdownServer(isRestarting);
++        } catch (Exception ex) {
+             ex.printStackTrace();
+         }
+     }
+ 
+-    // Paper start - sync copied from above with minor changes, async added
+-    private static void shutdownServer(boolean isRestarting)
+-    {
+-        if ( MinecraftServer.getServer().isSameThread() )
+-        {
++    private static void shutdownServer(boolean isRestarting) {
++        if (MinecraftServer.getServer().isSameThread()) {
+             // Kick all players
+-            for ( ServerPlayer p : com.google.common.collect.ImmutableList.copyOf( MinecraftServer.getServer().getPlayerList().players ) )
+-            {
+-                p.connection.disconnect( CraftChatMessage.fromStringOrEmpty( SpigotConfig.restartMessage, true ), org.bukkit.event.player.PlayerKickEvent.Cause.RESTART_COMMAND); // Paper - kick event reason (cause is never used))
++            for (ServerPlayer p : com.google.common.collect.ImmutableList.copyOf(MinecraftServer.getServer().getPlayerList().players)) {
++                p.connection.disconnect(CraftChatMessage.fromStringOrEmpty(SpigotConfig.restartMessage, true), org.bukkit.event.player.PlayerKickEvent.Cause.RESTART_COMMAND);
+             }
+-            // Give the socket a chance to send the packets
+-            try
+-            {
+-                Thread.sleep( 100 );
+-            } catch ( InterruptedException ex )
+-            {
++
++            try {
++                Thread.sleep(100);
++            } catch (InterruptedException ex) {
+             }
+ 
+             closeSocket();
+ 
+-            // Actually shutdown
+-            try
+-            {
++            try {
+                 MinecraftServer.getServer().close(); // calls stop()
+-            } catch ( Throwable t )
+-            {
++            } catch (Throwable t) {
+             }
+ 
+-            // Actually stop the JVM
+-            System.exit( 0 );
+-
+-        } else
+-        {
+-            // Mark the server to shutdown at the end of the tick
+-            MinecraftServer.getServer().safeShutdown( false, isRestarting );
++            System.exit(0);
++        } else {
++            MinecraftServer.getServer().safeShutdown(false, isRestarting);
+ 
+-            // wait 10 seconds to see if we're actually going to try shutdown
+-            try
+-            {
+-                Thread.sleep( 10000 );
+-            }
+-            catch (InterruptedException ignored)
+-            {
++            try {
++                Thread.sleep(10000);
++            } catch (InterruptedException ignored) {
+             }
+ 
+-            // Check if we've actually hit a state where the server is going to safely shutdown
+-            // if we have, let the server stop as usual
+             if (MinecraftServer.getServer().isStopped()) return;
+ 
+-            // If the server hasn't stopped by now, assume worse case and kill
+             closeSocket();
+-            System.exit( 0 );
++            System.exit(0);
+         }
+     }
+-    // Paper end
+ 
+-    // Paper - Split from moved code
+-    private static void closeSocket()
+-    {
+-        // Close the socket so we can rebind with the new process
++    private static void closeSocket() {
+         MinecraftServer.getServer().getConnection().stop();
+ 
+-        // Give time for it to kick in
+-        try
+-        {
+-            Thread.sleep( 100 );
+-        } catch ( InterruptedException ex )
+-        {
++        try {
++            Thread.sleep(100);
++        } catch (InterruptedException ex) {
+         }
+     }
+-    // Paper end
+-
+-    // Paper start - copied from above and modified to return if the hook registered
+-    public static boolean addShutdownHook(String restartScript) // Paper
+-    {
+-        String[] split = restartScript.split( " " );
+-        if ( split.length > 0 && new File( split[0] ).isFile() )
+-        {
+-            Thread shutdownHook = new Thread()
+-            {
++
++    public static boolean addShutdownHook(String restartScript) {
++        String[] split = restartScript.split(" ");
++        if (split.length > 0 && new File(split[0]).isFile()) {
++            Thread shutdownHook = new Thread() {
+                 @Override
+-                public void run()
+-                {
+-                    try
+-                    {
+-                        String os = System.getProperty( "os.name" ).toLowerCase(java.util.Locale.ENGLISH);
+-                        if ( os.contains( "win" ) )
+-                        {
+-                            Runtime.getRuntime().exec( "cmd /c start " + restartScript );
+-                        } else
+-                        {
+-                            Runtime.getRuntime().exec( "sh " + restartScript );
++                public void run() {
++                    try {
++                        String os = System.getProperty("os.name").toLowerCase(java.util.Locale.ENGLISH);
++                        if (os.contains("win")) {
++                            Runtime.getRuntime().exec("cmd /c start " + restartScript);
++                        } else {
++                            Runtime.getRuntime().exec("sh " + restartScript);
+                         }
+-                    } catch ( Exception e )
+-                    {
++                    } catch (Exception e) {
+                         e.printStackTrace();
+                     }
+                 }
+             };
+ 
+-            shutdownHook.setDaemon( true );
+-            Runtime.getRuntime().addShutdownHook( shutdownHook );
++            shutdownHook.setDaemon(true);
++            Runtime.getRuntime().addShutdownHook(shutdownHook);
+             return true;
+-        } else
+-        {
++        } else {
+             return false;
+         }
+     }
+-    // Paper end
+-
+ }

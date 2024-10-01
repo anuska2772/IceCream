@@ -1,0 +1,19 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <84547061+Pan-cakse@users.noreply.github.com>
+Date: Mon, 30 Sep 2024 20:24:51 +0000
+Subject: [PATCH] Change permission for command
+
+
+diff --git a/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java b/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java
+index 1150789e3e46be4c3eac1a77f389124959eef644..c769ffc906f05f4bd650d7ecbe9c4d7674445f35 100644
+--- a/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java
++++ b/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java
+@@ -19,7 +19,7 @@ public class IceCreamCommand extends Command {
+         super(name);
+         this.description = "IceCream related commands";
+         this.usageMessage = "/icecream [reload | version]";
+-        this.setPermission("bukkit.command.icecream");
++        this.setPermission("icecreammc.command.icecream");
+     }
+ 
+     @Override

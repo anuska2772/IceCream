@@ -1,0 +1,18 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <84547061+Pan-cakse@users.noreply.github.com>
+Date: Thu, 3 Oct 2024 03:48:14 +0000
+Subject: [PATCH] Add Spongepowered Mixin API
+
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index b7d584c8b96eb7699e5df90ed04bf22ee256d571..f6883245ba6af041c28561168229a5b238c54121 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -50,6 +50,7 @@ dependencies {
+     apiAndDocs("net.kyori:adventure-text-serializer-legacy")
+     apiAndDocs("net.kyori:adventure-text-serializer-plain")
+     apiAndDocs("net.kyori:adventure-text-logger-slf4j")
++    apiAndDocs("org.spongepowered:mixin:0.8.5") // IceCream - Add spongepowered mixin api
+     api("org.apache.logging.log4j:log4j-api:$log4jVersion")
+     api("org.slf4j:slf4j-api:$slf4jVersion")
+     api("io.sentry:sentry:5.4.0") // Pufferfish

@@ -5,7 +5,7 @@ Subject: [PATCH] Config
 
 
 diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
-index 2762f54515b352271feb4b26f506b06cd0fb1909..35ee62f6298b4d3bc2e294c263e7ffc862a176fa 100644
+index 2762f54515b352271feb4b26f506b06cd0fb1909..acf8dee41d9c7a361754a6519e2882c5253fc21d 100644
 --- a/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 +++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServer.java
 @@ -58,6 +58,7 @@ import net.minecraft.world.level.GameType;
@@ -34,7 +34,7 @@ index 2762f54515b352271feb4b26f506b06cd0fb1909..35ee62f6298b4d3bc2e294c263e7ffc8
          this.setFlightAllowed(dedicatedserverproperties.allowFlight);
          this.setMotd(dedicatedserverproperties.motd);
 diff --git a/src/main/java/net/minecraft/world/level/Level.java b/src/main/java/net/minecraft/world/level/Level.java
-index 26fbc981ec9acafc7ba1753759375c142261b6ab..fd18ffa8a9d2fb43656f518c879da58611b7045a 100644
+index 5057d9d433ba002a22d22adfaf7323b2cfaee9af..bd250774399536a064429eb31e874fee77f86a9b 100644
 --- a/src/main/java/net/minecraft/world/level/Level.java
 +++ b/src/main/java/net/minecraft/world/level/Level.java
 @@ -83,6 +83,7 @@ import net.minecraft.world.phys.AABB;
@@ -62,7 +62,7 @@ index 26fbc981ec9acafc7ba1753759375c142261b6ab..fd18ffa8a9d2fb43656f518c879da586
          this.generator = gen;
          this.world = new CraftWorld((ServerLevel) this, gen, biomeProvider, env);
 diff --git a/src/main/java/org/bukkit/craftbukkit/CraftServer.java b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
-index 479a8422a6786a8ada8536d528e7f57a06c8107a..69b8a9be15462989fac3d5b1f042e2b0d21dba36 100644
+index 479a8422a6786a8ada8536d528e7f57a06c8107a..12b39fee2eb86129ad87fc0bb016a8beeb39c669 100644
 --- a/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 +++ b/src/main/java/org/bukkit/craftbukkit/CraftServer.java
 @@ -265,6 +265,8 @@ import net.md_5.bungee.api.chat.BaseComponent; // Spigot
@@ -113,7 +113,7 @@ index 479a8422a6786a8ada8536d528e7f57a06c8107a..69b8a9be15462989fac3d5b1f042e2b0
          public void restart() {
              org.spigotmc.RestartCommand.restart();
 diff --git a/src/main/java/org/bukkit/craftbukkit/Main.java b/src/main/java/org/bukkit/craftbukkit/Main.java
-index e35a562eec4b65335723c50180fe1471f858ae60..58cecb0253d191410aefac5d3ec18410b8c6728f 100644
+index e35a562eec4b65335723c50180fe1471f858ae60..d82037e8abb23f07818bc50a1f4821c10a55cab9 100644
 --- a/src/main/java/org/bukkit/craftbukkit/Main.java
 +++ b/src/main/java/org/bukkit/craftbukkit/Main.java
 @@ -190,6 +190,14 @@ public class Main {
@@ -133,7 +133,7 @@ index e35a562eec4b65335723c50180fe1471f858ae60..58cecb0253d191410aefac5d3ec18410
                          .withRequiredArg()
 diff --git a/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java b/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..06af4af987859081bcf23e91da02b295ec31eba4
+index 0000000000000000000000000000000000000000..c769ffc906f05f4bd650d7ecbe9c4d7674445f35
 --- /dev/null
 +++ b/src/main/java/xyz/icecreammc/icecream/commands/IceCreamCommand.java
 @@ -0,0 +1,66 @@
@@ -158,7 +158,7 @@ index 0000000000000000000000000000000000000000..06af4af987859081bcf23e91da02b295
 +        super(name);
 +        this.description = "IceCream related commands";
 +        this.usageMessage = "/icecream [reload | version]";
-+        this.setPermission("bukkit.command.icecream");
++        this.setPermission("icecreammc.command.icecream");
 +    }
 +
 +    @Override
@@ -205,7 +205,7 @@ index 0000000000000000000000000000000000000000..06af4af987859081bcf23e91da02b295
 +}
 diff --git a/src/main/java/xyz/icecreammc/icecream/config/IceCreamConfig.java b/src/main/java/xyz/icecreammc/icecream/config/IceCreamConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..8251cf1e42f159e3be874e4cc34498e6dcdec539
+index 0000000000000000000000000000000000000000..f3389890b39276aebe307abc8bc02307e14fc288
 --- /dev/null
 +++ b/src/main/java/xyz/icecreammc/icecream/config/IceCreamConfig.java
 @@ -0,0 +1,155 @@
@@ -366,7 +366,7 @@ index 0000000000000000000000000000000000000000..8251cf1e42f159e3be874e4cc34498e6
 +}
 diff --git a/src/main/java/xyz/icecreammc/icecream/config/IceCreamWorldConfig.java b/src/main/java/xyz/icecreammc/icecream/config/IceCreamWorldConfig.java
 new file mode 100644
-index 0000000000000000000000000000000000000000..3e64e0d2d925f9fca1eb38cc07c20cae785ef39f
+index 0000000000000000000000000000000000000000..23331d014334cfdc3c0c4400637259435edf7234
 --- /dev/null
 +++ b/src/main/java/xyz/icecreammc/icecream/config/IceCreamWorldConfig.java
 @@ -0,0 +1,80 @@

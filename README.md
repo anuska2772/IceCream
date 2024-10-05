@@ -11,6 +11,10 @@
 
 IceCream adds exciting new configuration options to Purpur, allowing users to have more control over their server environments.
 
+## Statistics
+### Uses bStats
+[![bStats Graph](https://bstats.org/signatures/server-implementation/IceCreamMC.svg)](https://bstats.org/plugin/server-implementation/IceCreamMC)
+
 ## Documentation
 
 For detailed information on how to use IceCream, visit our documentation:

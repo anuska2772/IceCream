@@ -1,7 +1,3 @@
----
-outline: deep
----
-
 # Contributing to IceCream
 
 IceCream is happy you're willing to contribute to our projects. We are usually

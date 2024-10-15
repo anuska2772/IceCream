@@ -1,0 +1,98 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: James Smith <eesastudios@gmail.com>
+Date: Tue, 15 Oct 2024 04:20:51 +0000
+Subject: [PATCH] Additional enchantments API
+
+
+diff --git a/src/main/java/org/bukkit/enchantments/Enchantment.java b/src/main/java/org/bukkit/enchantments/Enchantment.java
+index f38321c437b19125d57d25419e3cb564e3928d89..c3d58bed1e9767f9df68f278bb4e228c8797694e 100644
+--- a/src/main/java/org/bukkit/enchantments/Enchantment.java
++++ b/src/main/java/org/bukkit/enchantments/Enchantment.java
+@@ -4,6 +4,8 @@ import com.google.common.base.Preconditions;
+ import com.google.common.collect.Lists;
+ import java.util.Locale;
+ import org.bukkit.Keyed;
++import java.util.Map; // IceCream - Additional enchantment API
++import java.util.concurrent.ConcurrentHashMap; // IceCream - Additional enchantment API
+ import org.bukkit.NamespacedKey;
+ import org.bukkit.Registry;
+ import org.bukkit.Translatable;
+@@ -544,4 +546,78 @@ public abstract class Enchantment implements Keyed, Translatable, net.kyori.adve
+     public static Enchantment[] values() {
+         return Lists.newArrayList(Registry.ENCHANTMENT).toArray(new Enchantment[0]);
+     }
++
++// IceCream start - Additional enchantment API
++
++public class EnchantmentRegistry {
++
++    // ConcurrentHashMap ensures thread safety for multi-threaded environments
++    private static final Map<String, Enchantment> byKey = new ConcurrentHashMap<>();
++    private static final Map<String, Enchantment> byName = new ConcurrentHashMap<>();
++    private static boolean acceptingNew = false;
++
++    /**
++     * Start accepting any enchantment registrations
++     */
++    public static void allowAcceptingRegistrations() {
++        acceptingNew = true;
++    }
++
++    /**
++     * Stops accepting enchantment registrations
++     */
++    public static void stopAcceptingRegistrations() {
++        acceptingNew = false;
++    }
++
++    /**
++     * Checks if new enchantments are being accepted
++     *
++     * @return boolean indicating if registrations are allowed
++     */
++    public static boolean isAcceptingRegistrations() {
++        return acceptingNew;
++    }
++
++    /**
++     * Forcefully register enchantments to the server by bypassing the Enchantment#acceptingNew field.
++     *
++     * @param enchantments Enchantments to register
++     */
++    public static void forceRegisterEnchantments(@NotNull Enchantment... enchantments) {
++        // Use modern Java for-each and pattern matching for concise code
++        if (!isAcceptingRegistrations()) allowAcceptingRegistrations();
++
++        for (Enchantment enchantment : enchantments) {
++            // Using pattern matching for instance checks
++            if (byKey.containsKey(enchantment.getKey().toString()) || byName.containsKey(enchantment.getName())) {
++                throw new IllegalArgumentException("Cannot register already-set enchantment: " + enchantment.getName());
++            }
++
++            byKey.put(enchantment.getKey().toString(), enchantment);
++            byName.put(enchantment.getName(), enchantment);
++        }
++
++        stopAcceptingRegistrations();
++    }
++
++    /**
++     * Forcefully register a single enchantment to the server by bypassing the Enchantment#acceptingNew field.
++     *
++     * @param enchantment Enchantment to register
++     */
++    public static void forceRegisterEnchantment(@NotNull Enchantment enchantment) {
++        if (byKey.containsKey(enchantment.getKey().toString()) || byName.containsKey(enchantment.getName())) {
++            throw new IllegalArgumentException("Cannot register already-set enchantment: " + enchantment.getName());
++        } else if (!isAcceptingRegistrations()) {
++            allowAcceptingRegistrations();
++        }
++
++        byKey.put(enchantment.getKey().toString(), enchantment);
++        byName.put(enchantment.getName(), enchantment);
++
++        stopAcceptingRegistrations();
++    // IceCream end - Additional enchantment API
++    }
++}
+ }

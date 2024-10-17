@@ -1,0 +1,35 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: nostalgic853 <yuu8583@proton.me>
+Date: Thu, 17 Oct 2024 01:47:32 +0000
+Subject: [PATCH] KeYi Player Skull API
+
+Comes from Leaf but credits to KeYi aswell.
+
+diff --git a/src/main/java/org/bukkit/entity/Player.java b/src/main/java/org/bukkit/entity/Player.java
+index 65260b33a13858309356d573dfa2989b92e7437c..15210244bd7f3ae919e8aa27e1275cbd69d193d6 100644
+--- a/src/main/java/org/bukkit/entity/Player.java
++++ b/src/main/java/org/bukkit/entity/Player.java
+@@ -3990,4 +3990,23 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
+         sendDeathScreen(message);
+     }
+     // Purpur end
++
++    // Leaf start - KeYi - Player Skull API
++    /**
++     * Get a skull item of a player.
++     * This method runs on main thread, which may freeze the server.
++     *
++     * @return A skull ItemStack of the player
++     */
++    ItemStack getSkull();
++
++    /**
++     * Get a skull item of a player.
++     * This method runs on main thread, which may freeze the server.
++     *
++     * @return A CompletableFuture of the skull ItemStack of the player
++     */
++    @Deprecated(forRemoval = true)
++    CompletableFuture<ItemStack> getSkullAsynchronously();
++    // Leaf end - KeYi
+ }

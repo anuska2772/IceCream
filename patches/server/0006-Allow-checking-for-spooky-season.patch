@@ -1,0 +1,26 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <pancakse@icecream.xyz>
+Date: Thu, 17 Oct 2024 02:59:25 +0000
+Subject: [PATCH] Allow checking for spooky season
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+index ad74d80f620d0e481a9613fcb29d3ab114154a4e..4e4eeb08dfb84758f8978f696ee5a29711e5fe50 100644
+--- a/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
++++ b/src/main/java/org/bukkit/craftbukkit/CraftWorld.java
+@@ -2562,4 +2562,15 @@ public class CraftWorld extends CraftRegionAccessor implements World {
+         return this.adventure$pointers;
+     }
+     // Paper end
++
++    // IceCream start - Check for Halloween Season
++    /**
++     * Checks whether it's currently Halloween season
++     *
++     * @return whether it's currently Halloween season
++     */
++    public boolean isHalloweenSeason() {
++        return net.minecraft.world.entity.ambient.Bat.isHalloweenSeason(getHandle());
++    }
++    // IceCream end - Check for Halloween Season
+ }

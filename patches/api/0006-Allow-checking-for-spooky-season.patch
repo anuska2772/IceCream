@@ -1,0 +1,64 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <pancakse@icecreammc.xyz>
+Date: Thu, 17 Oct 2024 02:59:23 +0000
+Subject: [PATCH] Allow checking for spooky season
+
+
+diff --git a/src/main/java/org/bukkit/Bukkit.java b/src/main/java/org/bukkit/Bukkit.java
+index 3a71f8fe73a2309f57cb06dedf204d3e37b46b03..59606222deafc5ffe5ef8703a79f95dc4ed81084 100644
+--- a/src/main/java/org/bukkit/Bukkit.java
++++ b/src/main/java/org/bukkit/Bukkit.java
+@@ -3044,4 +3044,15 @@ public final class Bukkit {
+         server.clearBlockHighlights();
+     }
+     // Purpur end
++
++    // IceCream start - Check for Halloween Season
++    /**
++     * Checks whether it's currently Halloween season
++     *
++     * @return whether it's currently Halloween season
++     */
++    public static boolean isHalloweenSeason() {
++        return server.isHalloweenSeason();
++    }
++    // IceCream end - Check for Halloween Season
+ }
+diff --git a/src/main/java/org/bukkit/Server.java b/src/main/java/org/bukkit/Server.java
+index 3ff20b31ddc795119426da13438f4aacc9baf4cb..72092cb11eb510d5fcde7e79d567dc52ef87069b 100644
+--- a/src/main/java/org/bukkit/Server.java
++++ b/src/main/java/org/bukkit/Server.java
+@@ -2674,4 +2674,15 @@ public interface Server extends PluginMessageRecipient, net.kyori.adventure.audi
+      */
+     void clearBlockHighlights();
+     // Purpur end
++
++    // IceCream start - Check for Halloween Season
++    /**
++     * Checks whether it's currently Halloween season
++     *
++     * @return whether it's currently Halloween season
++     */
++    default boolean isHalloweenSeason() {
++        return getWorlds().get(0).isHalloweenSeason();
++    }
++    // IceCream end - Check for Halloween Season
+ }
+diff --git a/src/main/java/org/bukkit/World.java b/src/main/java/org/bukkit/World.java
+index 36cf567973900d1e472616748926aecb9afcb42f..1dd371d3ba1db83ee7027da51e7e6006bb99602b 100644
+--- a/src/main/java/org/bukkit/World.java
++++ b/src/main/java/org/bukkit/World.java
+@@ -4443,4 +4443,13 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
+             }
+         }
+     }
++
++    // IceCream start - Check for Halloween Season
++    /**
++     * Checks whether it's currently Halloween season
++     *
++     * @return whether it's currently Halloween season
++     */
++    boolean isHalloweenSeason();
++    // IceCream end - Check for Halloween Season
+ }

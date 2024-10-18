@@ -1,0 +1,739 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <pancakse@icecreammc.xy>
+Date: Thu, 17 Oct 2024 22:37:43 +0000
+Subject: [PATCH] Add Ignite
+
+ * Copyright (c) vectrix.space <https://vectrix.space/>
+ * Copyright (c) contributors
+
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 01ad30526e43ece99f08430cce038e1f908cc11f..f6e713d05dc3e0eff08f194c0f6778ed7f058b93 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -55,6 +55,8 @@ dependencies {
+     api("org.slf4j:slf4j-api:$slf4jVersion")
+     api("io.sentry:sentry:5.4.0") // Pufferfish
+ 
++    // https://mvnrepository.com/artifact/org.tinylog/tinylog-api
++    implementation("org.tinylog:tinylog-api:2.7.0") // IceCream
+     implementation("org.ow2.asm:asm:9.7")
+     implementation("org.ow2.asm:asm-commons:9.7")
+     // Paper end
+diff --git a/src/main/java/space/vectrix/ignite/Blackboard.java b/src/main/java/space/vectrix/ignite/Blackboard.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..ef2ad4e3dfd6d7b409e013408944f1ea58082ce2
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/Blackboard.java
+@@ -0,0 +1,127 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite;
++
++import java.nio.file.Path;
++import java.nio.file.Paths;
++import java.util.Optional;
++import java.util.function.Supplier;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++import org.jetbrains.annotations.UnknownNullability;
++import space.vectrix.ignite.util.BlackboardMap;
++
++/**
++ * Represents a map of startup flags.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++public final class Blackboard {
++  private static final BlackboardMap BLACKBOARD = BlackboardMap.create();
++
++  // formatting:off
++  public static final BlackboardMap.@NotNull Key<Boolean> DEBUG = key("ignite.debug", Boolean.class, false);
++  public static final BlackboardMap.@NotNull Key<String> GAME_LOCATOR = key("ignite.locator", String.class, "dummy");
++  public static final BlackboardMap.@NotNull Key<Path> GAME_JAR = key("ignite.jar", Path.class, Paths.get("./server.jar"));
++  public static final BlackboardMap.@NotNull Key<String> GAME_TARGET = key("ignite.target", String.class, "org.bukkit.craftbukkit.Main");
++  public static final BlackboardMap.@NotNull Key<Path> GAME_LIBRARIES = key("ignite.libraries", Path.class, Paths.get("./libraries"));
++  public static final BlackboardMap.@NotNull Key<Path> MODS_DIRECTORY = key("ignite.mods", Path.class, Paths.get("./mods"));
++  // formatting:on
++
++  /**
++   * Returns the value associated with the {@link BlackboardMap.Key}.
++   *
++   * @param key the key
++   * @param <T> the value type
++   * @return the value
++   * @since 1.0.0
++   */
++  public static <T> @NotNull Optional<T> get(final BlackboardMap.@NotNull Key<T> key) {
++    return Blackboard.BLACKBOARD.get(key);
++  }
++
++  /**
++   * Returns the value associated with the {@link BlackboardMap.Key}.
++   *
++   * @param key the key
++   * @param <T> the value type
++   * @return the value
++   * @since 1.0.0
++   */
++  public static <T> @UnknownNullability T raw(final BlackboardMap.@NotNull Key<T> key) {
++    return Blackboard.BLACKBOARD.get(key).orElse(key.defaultValue());
++  }
++
++  /**
++   * Supplies the value associated with the {@link BlackboardMap.Key}.
++   *
++   * @param key the key
++   * @param supplier the supplier
++   * @param <T> the value type
++   * @since 1.0.0
++   */
++  public static <T> void compute(final BlackboardMap.@NotNull Key<T> key, final @NotNull Supplier<T> supplier) {
++    Blackboard.BLACKBOARD.put(key, Blackboard.supplyOrNull(supplier));
++  }
++
++  /**
++   * Sets the value associated with the {@link BlackboardMap.Key}.
++   *
++   * @param key the key
++   * @param value the value
++   * @param <T> the value type
++   * @since 1.0.0
++   */
++  public static <T> void put(final BlackboardMap.@NotNull Key<T> key, final @Nullable T value) {
++    Blackboard.BLACKBOARD.put(key, value);
++  }
++
++  /**
++   * Returns a new {@link BlackboardMap.Key} for the given key, type and
++   * default value.
++   *
++   * @param key the key
++   * @param type the type
++   * @param defaultValue the default value
++   * @param <T> the value type
++   * @return a new blackboard key
++   * @since 1.0.0
++   */
++  public static <T> BlackboardMap.@NotNull Key<T> key(final @NotNull String key, final @NotNull Class<? super T> type, final @Nullable T defaultValue) {
++    return BlackboardMap.Key.of(Blackboard.BLACKBOARD, key, type, defaultValue);
++  }
++
++  private static <T> @Nullable T supplyOrNull(final @NotNull Supplier<T> supplier) {
++    try {
++      return supplier.get();
++    } catch(final Throwable throwable) {
++      return null;
++    }
++  }
++
++  private Blackboard() {
++  }
++}
+diff --git a/src/main/java/space/vectrix/ignite/Ignite.java b/src/main/java/space/vectrix/ignite/Ignite.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..84313685a67715df0b6bc5161b4e72de32468da3
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/Ignite.java
+@@ -0,0 +1,56 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite;
++
++import org.jetbrains.annotations.NotNull;
++import space.vectrix.ignite.mod.Mods;
++
++/**
++ * Provides static access to the main functions of Ignite.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++public final class Ignite {
++  private static Platform PLATFORM;
++
++  /* package */ static void initialize(final @NotNull Platform platform) {
++    Ignite.PLATFORM = platform;
++  }
++
++  /**
++   * Returns the {@link Mods}.
++   *
++   * @return the mods
++   * @since 1.0.0
++   */
++  public static @NotNull Mods mods() {
++    if(Ignite.PLATFORM == null) throw new IllegalStateException("Ignite has not been initialized yet!");
++    return Ignite.PLATFORM.mods();
++  }
++
++  private Ignite() {
++  }
++}
+diff --git a/src/main/java/space/vectrix/ignite/Platform.java b/src/main/java/space/vectrix/ignite/Platform.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..5c20c74b665f678a2b24269906666ff231afb839
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/Platform.java
+@@ -0,0 +1,46 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite;
++
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import space.vectrix.ignite.mod.Mods;
++
++/**
++ * Provides access to the main functions of Ignite.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++@ApiStatus.NonExtendable
++public interface Platform {
++  /**
++   * Returns the {@link Mods}.
++   *
++   * @return the mods
++   * @since 1.0.0
++   */
++  @NotNull Mods mods();
++}
+diff --git a/src/main/java/space/vectrix/ignite/mod/ModContainer.java b/src/main/java/space/vectrix/ignite/mod/ModContainer.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0c99c3e882d98e31f992ba07d2a1797d20ad4cd7
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/mod/ModContainer.java
+@@ -0,0 +1,70 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite.mod;
++
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.tinylog.TaggedLogger;
++
++/**
++ * Represents a mod container.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++@ApiStatus.NonExtendable
++public interface ModContainer {
++  /**
++   * Returns a {@link TaggedLogger} for this mod.
++   *
++   * @return the mod logger
++   * @since 1.0.0
++   */
++  @NotNull TaggedLogger logger();
++
++  /**
++   * Returns the mod id.
++   *
++   * @return the id
++   * @since 1.0.0
++   */
++  @NotNull String id();
++
++  /**
++   * Returns the mod version.
++   *
++   * @return the version
++   * @since 1.0.0
++   */
++  @NotNull String version();
++
++  /**
++   * Returns the mod resource.
++   *
++   * @return the resource
++   * @since 1.0.0
++   */
++  @NotNull ModResource resource();
++}
+diff --git a/src/main/java/space/vectrix/ignite/mod/ModResource.java b/src/main/java/space/vectrix/ignite/mod/ModResource.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..0529e67a994f866128a91dc2efe49f2a39f9b158
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/mod/ModResource.java
+@@ -0,0 +1,73 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite.mod;
++
++import java.nio.file.FileSystem;
++import java.nio.file.Path;
++import java.util.jar.Manifest;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.UnknownNullability;
++
++/**
++ * Represents a mod resource.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++@ApiStatus.NonExtendable
++public interface ModResource {
++  /**
++   * Returns the resource locator type.
++   *
++   * @return the resource locator type
++   * @since 1.0.0
++   */
++  @NotNull String locator();
++
++  /**
++   * Returns the resource path.
++   *
++   * @return the resource path
++   * @since 1.0.0
++   */
++  @NotNull Path path();
++
++  /**
++   * Returns the {@link Manifest} for this resource.
++   *
++   * @return the manifest
++   * @since 1.0.0
++   */
++  @UnknownNullability Manifest manifest();
++
++  /**
++   * Returns the {@link FileSystem} for this resource.
++   *
++   * @return the file system
++   * @since 1.0.0
++   */
++  @NotNull FileSystem fileSystem();
++}
+diff --git a/src/main/java/space/vectrix/ignite/mod/Mods.java b/src/main/java/space/vectrix/ignite/mod/Mods.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..9d2976bd05c6c2e7554bf6763daea8d6ec86ddbb
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/mod/Mods.java
+@@ -0,0 +1,75 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite.mod;
++
++import java.util.Collection;
++import java.util.List;
++import java.util.Optional;
++import org.jetbrains.annotations.ApiStatus;
++import org.jetbrains.annotations.NotNull;
++
++/**
++ * Represents the mod manager.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++@ApiStatus.NonExtendable
++public interface Mods {
++  /**
++   * Returns {@code true} if the given mod is loaded, otherwise it returns
++   * {@code false}.
++   *
++   * @param id the mod identifier
++   * @return whether the mod is loaded
++   * @since 1.0.0
++   */
++  boolean loaded(final @NotNull String id);
++
++  /**
++   * Returns the {@link ModContainer} for the given mod identifier.
++   *
++   * @param id the mod identifier
++   * @return the mod container
++   * @since 1.0.0
++   */
++  @NotNull Optional<ModContainer> container(final @NotNull String id);
++
++  /**
++   * Returns a list of the located mod resources.
++   *
++   * @return the located mod resources
++   * @since 1.0.0
++   */
++  @NotNull List<ModResource> resources();
++
++  /**
++   * Returns a collection of the resolved mod containers.
++   *
++   * @return the resolved mod containers
++   * @since 1.0.0
++   */
++  @NotNull Collection<ModContainer> containers();
++}
+diff --git a/src/main/java/space/vectrix/ignite/mod/package-info.java b/src/main/java/space/vectrix/ignite/mod/package-info.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..4f93cfc11fce330e6f8b8a5c1627927d09b73cec
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/mod/package-info.java
+@@ -0,0 +1,4 @@
++/**
++ * This package contains the mod API.
++ */
++package space.vectrix.ignite.mod;
+diff --git a/src/main/java/space/vectrix/ignite/package-info.java b/src/main/java/space/vectrix/ignite/package-info.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..6c6a3120309ce6810da50023848818f0be01460a
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/package-info.java
+@@ -0,0 +1,4 @@
++/**
++ * Ignite: A mixin mod loader for Paper/Spigot.
++ */
++package space.vectrix.ignite;
+diff --git a/src/main/java/space/vectrix/ignite/util/BlackboardMap.java b/src/main/java/space/vectrix/ignite/util/BlackboardMap.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..75c2747f7045852ab9cbfad632a1c7ad0bd492cb
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/util/BlackboardMap.java
+@@ -0,0 +1,199 @@
++/*
++ * This file is part of Ignite, licensed under the MIT License (MIT).
++ *
++ * Copyright (c) vectrix.space <https://vectrix.space/>
++ * Copyright (c) contributors
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++package space.vectrix.ignite.util;
++
++import java.util.Map;
++import java.util.Objects;
++import java.util.Optional;
++import java.util.concurrent.ConcurrentHashMap;
++import java.util.concurrent.atomic.AtomicLong;
++import org.jetbrains.annotations.NotNull;
++import org.jetbrains.annotations.Nullable;
++import org.jetbrains.annotations.UnknownNullability;
++
++import static java.util.Objects.requireNonNull;
++
++/**
++ * Represents a typed map.
++ *
++ * @author vectrix
++ * @since 1.0.0
++ */
++public final class BlackboardMap {
++  /**
++   * Returns a new {@link BlackboardMap}.
++   *
++   * @return a new blackboard map
++   * @since 1.0.0
++   */
++  public static @NotNull BlackboardMap create() {
++    return new BlackboardMap();
++  }
++
++  private final Map<String, Key<Object>> keys = new ConcurrentHashMap<>();
++  private final Map<Key<Object>, Object> values = new ConcurrentHashMap<>();
++
++  private BlackboardMap() {
++  }
++
++  /**
++   * Returns the value associated with the given {@link Key}.
++   *
++   * @param key the key
++   * @param <V> the value type
++   * @return the value
++   * @since 1.0.0
++   */
++  public <V> @NotNull Optional<V> get(final @NotNull Key<V> key) {
++    requireNonNull(key, "key");
++    return Optional.ofNullable(key.type().cast(this.values.get(key)));
++  }
++
++  /**
++   * Sets the given value associated with the given {@link Key}.
++   *
++   * @param key the key
++   * @param value the value
++   * @param <V> the value type
++   * @since 1.0.0
++   */
++  public <V> void put(final @NotNull Key<V> key, final @Nullable V value) {
++    requireNonNull(key, "key");
++
++    if(value == null) return;
++    if(Objects.equals(key.defaultValue(), value)) {
++      this.values.remove(key);
++    } else {
++      this.put(this.values, key, value);
++    }
++  }
++
++  @SuppressWarnings("unchecked")
++  private <C1, C2, V> void put(final @NotNull Map<C1, C2> map, final @NotNull Key<V> key, final @NotNull V value) {
++    map.put((C1) key, (C2) value);
++  }
++
++  private @NotNull Map<String, Key<Object>> keys() {
++    return this.keys;
++  }
++
++  /**
++   * Represents a key for a {@link BlackboardMap}.
++   *
++   * @author vectrix
++   * @param <T> the value type
++   * @since 1.0.0
++   */
++  public static final class Key<T> implements Comparable<Key<T>> {
++    /**
++     * Returns a new blackboard key for the given {@link BlackboardMap}, with
++     * the given name and type.
++     *
++     * @param map the blackboard
++     * @param name the name
++     * @param type the type
++     * @param defaultValue the default value
++     * @param <V> the value type
++     * @return a new key
++     * @since 1.0.0
++     */
++    @SuppressWarnings("unchecked")
++    public static <V> @NotNull Key<V> of(final @NotNull BlackboardMap map, final @NotNull String name, final @NotNull Class<? super V> type, final @UnknownNullability V defaultValue) {
++      final Key<V> result = (Key<V>) map.keys().computeIfAbsent(name, key -> new Key<>(key, (Class<Object>) type, defaultValue));
++      if(result.type != type) throw new IllegalArgumentException("Mismatched type!");
++      return result;
++    }
++
++    private static final AtomicLong ID_GENERATOR = new AtomicLong();
++
++    private final long identifier;
++    private final String name;
++    private final Class<T> type;
++    private final T defaultValue;
++
++    private Key(final @NotNull String name, final @NotNull Class<T> type, final @UnknownNullability T defaultValue) {
++      this.identifier = Key.ID_GENERATOR.getAndIncrement();
++      this.name = name;
++      this.type = type;
++      this.defaultValue = defaultValue;
++    }
++
++    /**
++     * Returns the name.
++     *
++     * @return the name
++     * @since 1.0.0
++     */
++    public @NotNull String name() {
++      return this.name;
++    }
++
++    /**
++     * Returns the type.
++     *
++     * @return the type
++     * @since 1.0.0
++     */
++    public @NotNull Class<T> type() {
++      return this.type;
++    }
++
++    /**
++     * Returns the default value.
++     *
++     * @return the default value
++     * @since 1.0.0
++     */
++    public @UnknownNullability T defaultValue() {
++      return this.defaultValue;
++    }
++
++    @Override
++    public int hashCode() {
++      return (int) (this.identifier ^ (this.identifier >>> 32));
++    }
++
++    @Override
++    public boolean equals(final @Nullable Object other) {
++      if(this == other) return true;
++      if(!(other instanceof Key<?>)) return false;
++      final Key<?> that = (Key<?>) other;
++      return Objects.equals(this.identifier, that.identifier);
++    }
++
++    @Override
++    public String toString() {
++      return "Key{identifier=" + this.identifier + ", name=" + this.name + ", type=" + this.type + "}";
++    }
++
++    @Override
++    public int compareTo(final @NotNull Key<T> other) {
++      if(this == other) return 0;
++      if(this.identifier < other.identifier) return -1;
++      if(this.identifier > other.identifier) return 1;
++      throw new RuntimeException("Unable to compare the given key!");
++    }
++  }
++}
+diff --git a/src/main/java/space/vectrix/ignite/util/package-info.java b/src/main/java/space/vectrix/ignite/util/package-info.java
+new file mode 100644
+index 0000000000000000000000000000000000000000..dc59c94862430d11e82c7a7a85e4b7add10f769f
+--- /dev/null
++++ b/src/main/java/space/vectrix/ignite/util/package-info.java
+@@ -0,0 +1,4 @@
++/**
++ * This package contains utility classes.
++ */
++package space.vectrix.ignite.util;

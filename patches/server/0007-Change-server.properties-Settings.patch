@@ -1,0 +1,36 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Pancakse <84547061+Pan-cakse@users.noreply.github.com>
+Date: Mon, 21 Oct 2024 05:33:18 +0000
+Subject: [PATCH] Change server.properties Settings
+
+
+diff --git a/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java b/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
+index 9ebe1f1797b5be562bc4f6d92b9a4d6022ca2151..d8aa0083279aa54c5545bc667a9fd3924978291d 100644
+--- a/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
++++ b/src/main/java/net/minecraft/server/dedicated/DedicatedServerProperties.java
+@@ -56,13 +56,13 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
+     public final boolean onlineMode = this.get("online-mode", true);
+     public final boolean preventProxyConnections = this.get("prevent-proxy-connections", false);
+     public final String serverIp = this.get("server-ip", "");
+-    public final String serverName = this.get("server-name", "Unknown Server"); // Purpur
++    public final String serverName = this.get("server-name", "IceCream"); // IceCream
+     public final boolean spawnAnimals = this.get("spawn-animals", true);
+     public final boolean spawnNpcs = this.get("spawn-npcs", true);
+     public final boolean pvp = this.get("pvp", true);
+     public final boolean allowFlight = this.get("allow-flight", false);
+-    public final String motd = this.get("motd", "A Minecraft Server");
+-    public final String bugReportLink = this.get("bug-report-link", "");
++    public final String motd = this.get("motd", "A Minecraft Server running IceCreamMC!"); // IceCream
++    public final String bugReportLink = this.get("bug-report-link", "https://github.com/IceCreamMC/IceCream/issues"); // IceCream
+     public final boolean forceGameMode = this.get("force-gamemode", false);
+     public final boolean enforceWhitelist = this.get("enforce-whitelist", false);
+     public final Difficulty difficulty;
+@@ -158,7 +158,7 @@ public class DedicatedServerProperties extends Settings<DedicatedServerPropertie
+         this.textFilteringConfig = this.get("text-filtering-config", "");
+         this.playerIdleTimeout = this.getMutable("player-idle-timeout", 0);
+         this.whiteList = this.getMutable("white-list", false);
+-        this.enforceSecureProfile = this.get("enforce-secure-profile", true);
++        this.enforceSecureProfile = this.get("enforce-secure-profile", false); // IceCream
+         this.logIPs = this.get("log-ips", true);
+         this.acceptsTransfers = this.get("accepts-transfers", false);
+         String s = this.get("level-seed", "");

@@ -3,7 +3,6 @@ From: nostalgic853 <yuu8583@proton.me>
 Date: Thu, 17 Oct 2024 01:48:00 +0000
 Subject: [PATCH] KeYi Player Skull API
 
-
 Comes from Leaf but credits to KeYi aswell.
 
 diff --git a/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java b/src/main/java/org/bukkit/craftbukkit/entity/CraftPlayer.java
